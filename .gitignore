@@ -1,0 +1,19 @@
+# VSCODE #
+##########
+.vscode
+
+# PYTHON #
+##########
+__pycache__
+*.egg-info
+/build/**
+
+#  FILE  #
+##########
+*.npy
+*.jpg
+*.gif
+
+log
+data
+nersc

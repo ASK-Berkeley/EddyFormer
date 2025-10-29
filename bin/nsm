@@ -1,0 +1,93 @@
+#!/usr/bin/env python
+from absl import app
+from absl import flags
+from absl import logging
+
+from sys import argv
+if len(argv) == 1:
+  cmd = None
+else:
+  cmd = argv[1]
+
+from ml_collections.config_flags import config_flags
+config_flags.DEFINE_config_file("flow", None, "Flow configuration")
+config_flags.DEFINE_config_file("model", None, "Model configuration")
+
+if cmd == "train":
+  config_flags.DEFINE_config_file("config", "configs/train.py",
+                                  "Model training configuration")
+if cmd == "generate":
+  config_flags.DEFINE_config_file("config", "nsm/generate.py",
+                                  "Dataset generation configuration")
+
+from nsm import config # DEFINE_string configs "debug" and "tqdm"
+flags.DEFINE_bool("cpu", False, "Disable GPU devices", short_name="c")
+flags.DEFINE_bool("interactive", False, "Enter REPL mode", short_name="i")
+
+from jax import config
+config.config_with_absl()
+
+FLAGS = flags.FLAGS
+
+def main(_):
+
+  if FLAGS.cpu:
+    config.update("jax_platforms", "cpu")
+
+  if FLAGS.debug:
+    config.update("jax_debug_nans", True)
+    config.update("jax_numpy_dtype_promotion", "strict")
+    config.update("jax_traceback_in_locations_limit", -1)
+
+  flow = None
+  if FLAGS.flow:
+    from configs.flow import resolve
+    logging.info("Flow %s", FLAGS.flow)
+    flow = resolve(FLAGS.flow)
+
+  model = None
+  if FLAGS.model:
+    from configs.model import resolve
+    logging.info("Model %s", FLAGS.model)
+    model =  resolve(FLAGS.model)
+
+# ----------------------------------- TRAIN ---------------------------------- #
+
+  if cmd == "train":
+    logging.info("%s", FLAGS.config)
+
+    from nsm.writer import Writer
+    writer = Writer(FLAGS)
+    writer.start()
+
+    from configs.train import resolve
+    train = resolve(FLAGS.config)
+    train(flow, model, writer)
+  
+    writer.join()
+
+# --------------------------------- GENERATE --------------------------------- #
+
+  if cmd == "generate":
+    logging.info("%s", FLAGS.config)
+
+    from nsm.generate import main
+    main(FLAGS.config, flow)
+
+# -------------------------------- INTERACTIVE ------------------------------- #
+
+  if FLAGS.interactive:
+
+    import matplotlib.pyplot as plt, scienceplots
+    plt.style.use(["science", "grid", "no-latex"])
+
+    import nsm, nsm.typing, code
+    code.interact(local={
+      **nsm.__dict__,
+      **nsm.typing.__dict__,
+      **locals(),
+    })
+
+if __name__ == "__main__":
+
+  app.run(main)
