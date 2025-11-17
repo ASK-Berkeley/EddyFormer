@@ -2,9 +2,9 @@
 
 EddyFormer is a Transformer-based spectral element model for turbulence simulation.
 
-> Computationally resolving turbulence remains a central challenge in fluid dynamics due to its multi-scale interactions. Fully resolving large-scale turbulence through direct numerical simulation (DNS) is computationally prohibitive, motivating data-driven machine learning alternatives. In this work, we propose EddyFormer, a Transformer-based spectral-element (SEM) architecture for large-scale turbulence simulation that combines the accuracy of spectral methods with the scalability of the attention mechanism. We introduce an SEM tokenization that decomposes the flow into grid-scale and subgrid-scale components, enabling capture of both local and global features. We create a new three-dimensional isotropic turbulence dataset and train EddyFormer to achieves DNS-level accuracy at 256^3 resolution, providing a 30x speedup over DNS. When applied to unseen domains up to 4x larger than in training, EddyFormer preserves accuracy on physics-invariant metrics-energy spectra, correlation functions, and structure functions-showing domain generalization. On The Well benchmark suite of diverse turbulent flows, EddyFormer resolves cases where prior ML models fail to converge, accurately reproducing complex dynamics across a wide range of physical conditions.
+![demo](re94-demo.gif)
 
-For more details, see our paper: https://arxiv.org/abs/2510.24173.
+EddyFormer uses SEM tokenization to represent grid- and subgrid-scale dynamics, combining spectral accuracy with scalable attention mechanism. Trained on a 3D isotropic turbulence dataset, EddyFormer matches DNS accuracy at 256³ while running 30× faster. For more details, see our paper: https://arxiv.org/abs/2510.24173.
 
 ## Dependencies
 
